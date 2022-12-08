@@ -9,8 +9,12 @@ const initialState = {
     error: null,
 };
 
-/// The action creators(pending,fulfilled, rejected) that are generated when AsyncThunk is created, are attached to the actual `fetchPost` function (that wraps thunk function),
-/// and can be passed to the `extraReducers` in the slice to listen for those actions.
+// When createAsyncThunk function executes it will return a function that creates action creators(pending,fulfilled, rejected) 
+// and thunk function, that function returned is dabbled 'thunk action creator', i think because the function creates both the 
+// thunk function which it will return and action creators  
+
+// The action creators(pending,fulfilled, rejected) that are generated, are attached to the thunk action creator in this case (`fetchPost`) function,
+// and can be passed to the `extraReducers` in the slice to listen for those actions.
 export const fetchPosts = createAsyncThunk(
     'posts/fetchPosts',
     async () => {

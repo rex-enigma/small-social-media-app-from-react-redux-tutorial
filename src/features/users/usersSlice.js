@@ -1,8 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { client } from "../../api/client";
 
-const initialState = [];
-
 export const fetchUsers = createAsyncThunk(
     'users/fetchUsers',
     async () => {
@@ -13,7 +11,7 @@ export const fetchUsers = createAsyncThunk(
 
 const usersSlice = createSlice({
     name: 'users',
-    initialState,
+    initialState: [],
     reducers: {},
     extraReducers: (builder) => {
         builder
@@ -25,5 +23,8 @@ const usersSlice = createSlice({
             })
     },
 });
+
+export const selectAllUsers = state => state.users;
+export const selectUserById = (state, userId) => state.users.find(user => user.id === userId)
 
 export default usersSlice.reducer;  

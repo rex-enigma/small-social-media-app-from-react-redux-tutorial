@@ -38,7 +38,7 @@ export function AddPostForm() {
                 //The thunk function eventually return a Promise that completed either with a fulfilled action if its succeeded, or the rejected action if it failed.
                 // We can await that Promise here to know when the thunk has finished its request. Redux toolkit adds a .unwrap() function the the returned Promise,
                 // which will return a new Promise that either has the actual 'action.payload' value from a fulfilled action, or throws an error if it's the rejected action.
-                // This lets us handle success and failure in this component using normal 'try/catch' logic.
+                // This lets us handle success or failure at this component level(in this component in this case) using normal 'try/catch' logic.
                 await dispatch(addNewPost({ title, content, user: userId })).unwrap();
                 setTitle('');
                 setContent('');
