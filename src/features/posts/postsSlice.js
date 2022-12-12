@@ -6,7 +6,7 @@ const postsAdapter = createEntityAdapter({
     sortComparer: (postA, postB) => postB.date.localeCompare(postA),
 });
 
-
+// getInitialState accepts additional state fields apart from id and entities field it create
 const initialState = postsAdapter.getInitialState({
     status: 'idle',
     error: null,
