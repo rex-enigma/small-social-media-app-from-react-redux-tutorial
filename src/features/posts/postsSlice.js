@@ -1,17 +1,20 @@
-import { createAsyncThunk, createSlice, nanoid } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, nanoid, createSelector, createEntityAdapter } from '@reduxjs/toolkit'
 import { client } from '../../api/client';
 
+// an entity adapter object will be  returned
+const postsAdapter = createEntityAdapter({
+    sortComparer: (postA, postB) => postB.date.localeCompare(postA),
+});
 
 
-const initialState = {
-    posts: [],
+const initialState = postsAdapter.getInitialState({
     status: 'idle',
     error: null,
-};
+});
 
 // When createAsyncThunk function executes it will return a function that creates action creators(pending,fulfilled, rejected) 
 // and thunk function, that function returned is dabbled 'thunk action creator', i think because the function creates both the 
-// thunk function which it will return and action creators  
+// action creators and thunk function which it will return  
 
 // The action creators(pending,fulfilled, rejected) that are generated, are attached to the thunk action creator in this case (`fetchPost`) function,
 // and can be passed to the `extraReducers` in the slice to listen for those actions.
@@ -68,8 +71,8 @@ const postSlice = createSlice(
                 }
             },
             updatePost(state, action) {
-                const { id, title, content } = action.payload;
-                const existingPost = state.posts.find(post => post.id === id);
+                const { postId, title, content } = action.payload;
+                const existingPost = state.entities[postId];
 
                 if (existingPost) {
                     existingPost.title = title;
@@ -80,8 +83,11 @@ const postSlice = createSlice(
             },
             addReaction(state, action) {
                 const { postId, reaction } = action.payload;
-                const existingPost = state.posts.find(post => post.id === postId);
-                existingPost.reactions[reaction]++;
+                const existingPost = state.entities[postId];
+                if (existingPost) {
+                    existingPost.reactions[reaction]++;
+                }
+
             },
         },
         extraReducers(builder) {
@@ -91,23 +97,44 @@ const postSlice = createSlice(
                 })
                 .addCase(fetchPosts.fulfilled, (state, action) => {
                     state.status = 'succeeded';
-                    state.posts = state.posts.concat(action.payload);
+                    // Add any fetched posts to the postsState
+                    // Use the 'upsertMany' reducer as a mutating update utility
+                    // if there's any items in action.payload that already exist in our state, the 'upsertMany' function will merge them together based on matching IDs.
+                    postsAdapter.upsertMany(state, action.payload);
                 })
                 .addCase(fetchPosts.rejected, (state, action) => {
                     state.status = ' rejected';
-                    state.posts.error = action.error.message;
+                    state.error = action.error.message;
                 })
                 .addCase(addNewPost.fulfilled, (state, action) => {
-                    state.posts.push(action.payload);
+                    // Use 'addOne' reducer or the fulfilled case.
+                    // you can also use this adapter reducer utility directly as the second argument of this 'addCase' function.
+                    postsAdapter.addOne(state, action.payload);
                 })
 
         }
     },
 );
 
-export const selectAllPosts = state => state.posts.posts;
-export const selectPostById = (state, postId) => state.posts.posts.find(post => post.id === postId);
+//export the customized selectors for this adapter using `getSelectors`;
+export const {
+    selectAll: selectAllPosts,
+    selectById: selectPostById,
+    selectIds: selectPostIds,
+} = postsAdapter.getSelectors(rootState => rootState.posts);
+
+//check some quick explanation at https://redux.js.org/tutorials/essentials/part-6-performance-normalization#memoizing-selector-functions
+// if selectPostsByUser(state, userId) is called multiple times, it will only re-run the output selector if either
+// posts(state.posts) or userId has changed
+export const selectPostsByUser = createSelector(
+    //input selectors
+    [selectAllPosts, (state, userId) => userId],
+    //output selector
+    (posts, userId) => posts.filter(post => post.user === userId), //should be updated
+);
 
 export const { addPost, updatePost, addReaction } = postSlice.actions;
 
 export default postSlice.reducer
+
+

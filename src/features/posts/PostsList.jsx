@@ -4,21 +4,17 @@ import { Link } from 'react-router-dom';
 import { PostAuthor } from './PostAuthor';
 import { TimeAgo } from './TimeAgo';
 import { ReactionButtons } from "./ReactionButtons";
-import { selectAllPosts, fetchPosts } from './postsSlice';
+import { selectAllPosts, selectPostIds, selectPostById, fetchPosts, } from './postsSlice';
 import { Spinner } from '../../components/Spinner'
 
 
 export function PostsList() {
   const dispatch = useDispatch();
-  const posts = useSelector(selectAllPosts);
-  // we want to order the post, we can't use array.sort() directly on the posts since it will mutate the posts state (as you know it shouldn't{only reducers should do that immutably})
-  // so we create a shallow copy with slice and sort it in a reverse chronological order by datetime string.
-  const orderedPosts = posts.slice().sort(
-    (postA, postB) => postB.date.localeCompare(postA.date)
-  );
+  const orderedPostIds = useSelector(selectPostIds);
 
-  const postStatus = useSelector(state => state.posts.status);
-  const error = useSelector(state => state.posts.error);
+
+  const postStatus = useSelector(rootState => rootState.posts.status);
+  const error = useSelector(rootState => rootState.posts.error);
 
   useEffect(() => {
     if (postStatus === 'idle') {
@@ -31,7 +27,7 @@ export function PostsList() {
   if (postStatus === 'loading') {
     content = <Spinner text='Loading..' />
   } else if (postStatus === 'succeeded') {
-    content = orderedPosts.map((post) => <PostExcerpt key={post.id} post={post} />)
+    content = orderedPostIds.map((postId) => <PostExcerpt key={postId} postId={postId} />)
   } else if (postStatus === 'rejected') {
     content = <div>{error}</div>
   }
@@ -46,7 +42,9 @@ export function PostsList() {
 
 }
 
-function PostExcerpt({ post }) {
+function PostExcerpt({ postId }) {
+  const post = useSelector(rootState => selectPostById(rootState, postId));
+
   return (
     <article className='post-excerpt' key={post.id}>
       <h3>{post.title}</h3>

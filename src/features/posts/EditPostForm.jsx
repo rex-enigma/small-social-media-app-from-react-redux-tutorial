@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { updatePost as updatePostActionCreator } from "./postsSlice";
+import { updatePost } from "./postsSlice";
 import { selectPostById } from "./postsSlice";
 
 
@@ -22,7 +22,7 @@ export function EditPostForm({ match }) {
 
     const onSavePostClick = () => {
         if (title && content) {
-            dispatch(updatePostActionCreator({ id: postId, title, content }));
+            dispatch(updatePost({ postId, title, content }));
             history.push(`/posts/${postId}`);
         }
     };

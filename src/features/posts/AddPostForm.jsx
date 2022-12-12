@@ -1,7 +1,7 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
+import { selectAllUsers } from "../users/usersSlice";
 import { addPost, addNewPost } from "./postsSlice";
 
 export function AddPostForm() {
@@ -12,8 +12,9 @@ export function AddPostForm() {
     const [addRequestStatus, setAddRequestStatus] = useState('idle');
 
     const dispatch = useDispatch();
-
-    const users = useSelector(state => state.users);
+    // selectAllUsers will receive the rootState from useSelector function then it will use the inline selector that was passed
+    // to the 'usersAdapter.getSelectors(rootState => rootState.users)' to get users state and then it will return  an array of users.
+    const users = useSelector(selectAllUsers);
 
     const onTitleChange = e => setTitle(e.target.value);
     const onContentChange = e => setContent(e.target.value);
