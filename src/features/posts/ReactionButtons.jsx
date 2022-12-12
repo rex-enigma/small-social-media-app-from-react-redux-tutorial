@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { addReaction as addReactionActionCreator } from "./postsSlice";
+import { addReaction } from "./postsSlice";
 
 const reactionEmoji = {
     thumbsUp: '👍',
@@ -19,7 +19,7 @@ export function ReactionButtons({ post }) {
             <button
                 key={name} type='button'
                 className='muted-button reaction-button'
-                onClick={() => dispatch(addReactionActionCreator({ postId: post.id, reaction: name }))}
+                onClick={() => dispatch(addReaction({ postId: post.id, reaction: name }))}
             >
                 {emoji} {post.reactions[name]}
             </button>
